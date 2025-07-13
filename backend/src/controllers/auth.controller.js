@@ -43,7 +43,7 @@ export async function signup(req, res) {
         name: newUser.fullname,
         image: newUser.profilePic || "",
       });
-      console.log(`Stream user created fro ${newUser.fullname}`);
+      console.log(`Stream user created for ${newUser.fullname}`);
     } catch (error) {
       console.error("Error creating Stream user:", error);
     }
@@ -63,7 +63,7 @@ export async function signup(req, res) {
 
     res.status(201).json({ success: true, user: newUser });
   } catch (error) {
-    console.log("Error in signUp conroller", error);
+    console.log("Error in signUp controller", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
