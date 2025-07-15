@@ -3,7 +3,7 @@ import useAuthHook from "../hooks/useAuthHook";
 import { BellIcon, LogOutIcon, ShipWheelIcon } from "lucide-react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { logout } from "../lib/api";
-// import ThemeSelector from "./ThemeSelector";
+import ThemeSelector from "./ThemeSelector";
 // import useLogout from "../hooks/useLogout";
 
 const Navbar = () => {
@@ -44,12 +44,12 @@ const Navbar = () => {
           </div>
 
           {/* TODO */}
-          {/* <ThemeSelector /> */}
+          <ThemeSelector />
 
           <div className="avatar">
             <div className="w-9 rounded-full">
               <img
-                src={authUser?.profilePic}
+                src={authUser?.profilePic || me}
                 alt="User Avatar"
                 rel="noreferrer"
               />
