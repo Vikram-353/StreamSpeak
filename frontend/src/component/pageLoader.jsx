@@ -1,7 +1,12 @@
 import React from "react";
+import { LoaderIcon } from "lucide-react";
 
-function pageLoader() {
-  return <div>pageLoader</div>;
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <LoaderIcon className="animate-spin size-10 text-primary" />
+    </div>
+  );
 }
 
-export default pageLoader;
+export default PageLoader;
