@@ -4,7 +4,7 @@ import {
   getOutgoingFriendReqs,
   getRecommendedUsers,
   getUserFriends,
-  sendFriendRequest,
+  sendfriendRequest,
 } from "../lib/api";
 import { Link } from "react-router-dom";
 import {
@@ -16,8 +16,8 @@ import {
 
 import { capitialize } from "../lib/utils";
 
-import FriendCard, { getLanguageFlag } from "../components/FriendCard";
-import NoFriendsFound from "../components/NoFriendsFound";
+import FriendCard, { getLanguageFlag } from "../component/FriendCard";
+import NoFriendsFound from "../component/NoFriendsFound";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
@@ -39,7 +39,7 @@ const HomePage = () => {
   });
 
   const { mutate: sendRequestMutation, isPending } = useMutation({
-    mutationFn: sendFriendRequest,
+    mutationFn: sendfriendRequest,
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"] }),
   });

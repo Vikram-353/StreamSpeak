@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ShipWheelIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import useSignup from "../hooks/useSignup";
+
 function Signup() {
   const [signupData, setSignupData] = useState({
     fullname: "",
