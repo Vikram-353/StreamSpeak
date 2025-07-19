@@ -121,7 +121,7 @@ export async function acceptfriendRequest(req, res) {
 
 export async function getfriendRequest(req, res) {
   try {
-    const incomingRequest = await FriendRequest.find({
+    const incomingReqs = await FriendRequest.find({
       recipient: req.user.id,
       status: "pending",
     }).populate(
@@ -134,7 +134,7 @@ export async function getfriendRequest(req, res) {
       status: "accepted",
     }).populate("recipient", "fullname profilePic ");
 
-    res.status(200).json({ incomingRequest, acceptedReqs });
+    res.status(200).json({ incomingReqs, acceptedReqs });
   } catch (error) {
     console.error("Error in getFriendRequest controller", error.message);
     res.status(500).json({ message: "Internal server error. " });

@@ -24,7 +24,7 @@ const App = () => {
   if (isLoading) return <PageLoader />;
 
   return (
-    <div className="h-screen" data-theme={theme}>
+    <div className="h-full" data-theme={theme}>
       <Routes>
         <Route
           path="/"
@@ -62,10 +62,10 @@ const App = () => {
           path="/notifications"
           element={
             isAuthenticated && isOnboarded ? (
-              // <Layout showSidebar={true}>
-              <NotificationsPage />
+              <Layout showSidebar={true}>
+                <NotificationsPage />
+              </Layout>
             ) : (
-              // </Layout>
               <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
             )
           }
@@ -85,10 +85,10 @@ const App = () => {
           path="/chat/:id"
           element={
             isAuthenticated && isOnboarded ? (
-              // <Layout showSidebar={false}>
-              <ChatPage />
+              <Layout showSidebar={false}>
+                <ChatPage />
+              </Layout>
             ) : (
-              /* </Layout> */
               <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
             )
           }
