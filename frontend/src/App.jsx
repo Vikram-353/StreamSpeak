@@ -9,7 +9,7 @@ import ChatPage from "./pages/ChatPage.jsx";
 import OnboardingPage from "./pages/OnboardingPage.jsx";
 
 import { Toaster } from "react-hot-toast";
-import PageLoader from "./component/pageLoader.jsx";
+import PageLoader from "./component/PageLoader.jsx";
 import useAuthUser from "./hooks/useAuthHook.js";
 import Layout from "./component/Layout.jsx";
 import { useThemeStore } from "./store/useThemeStore.js";
