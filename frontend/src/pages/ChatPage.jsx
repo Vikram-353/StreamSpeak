@@ -2,6 +2,10 @@ import React from "react";
 import { useState } from "react";
 import { useParams } from "react-router";
 import useAuthHook from "../hooks/useAuthHook";
+import ChatLoader from "../component/chatLoader";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getStreamToken } from "../lib/api";
+import CallButton from "../component/CallButton";
 import {
   Channel,
   ChannelHeader,
@@ -65,6 +69,18 @@ function ChatPage() {
     };
     initChat();
   }, [tokenData, authUser, targetUserId]);
+
+  const handleVideoCall = () => {
+    if (channel) {
+      const callUrl = `${window.location.origin}/call/${channel.id}`;
+
+      channel.sendMessage({
+        text: `I've started a video call. Join me here: ${callUrl}`,
+      });
+
+      toast.success("Video call link sent successfully!");
+    }
+  };
 
   if (loading || !chatClient || !channel) return <ChatLoader />;
   return (
