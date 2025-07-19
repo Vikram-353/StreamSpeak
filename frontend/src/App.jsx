@@ -6,12 +6,12 @@ import LoginPage from "./pages/LoginPage.jsx";
 import NotificationsPage from "./pages/NotificationPage.jsx";
 import CallPage from "./pages/CallPage.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
+import PageLoader from "./components/PageLoader.js";
 import OnboardingPage from "./pages/OnboardingPage.jsx";
 
 import { Toaster } from "react-hot-toast";
-import PageLoader from "./component/PageLoader.jsx";
 import useAuthUser from "./hooks/useAuthHook.js";
-import Layout from "./component/Layout.jsx";
+import Layout from "./components/Layout.js";
 import { useThemeStore } from "./store/useThemeStore.js";
 
 const App = () => {

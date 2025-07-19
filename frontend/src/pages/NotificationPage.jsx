@@ -7,7 +7,7 @@ import {
   MessageSquareIcon,
   UserCheckIcon,
 } from "lucide-react";
-import NoNotificationsFound from "../component/NoNotificationsFound";
+import NoNotificationsFound from "../components/NoNotificationsFound";
 
 function NotificationPage() {
   const queryClient = useQueryClient();

@@ -2,10 +2,10 @@ import React from "react";
 import { useState } from "react";
 import { useParams } from "react-router";
 import useAuthHook from "../hooks/useAuthHook";
-import ChatLoader from "../component/chatLoader";
+import ChatLoader from "../components/chatLoader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getStreamToken } from "../lib/api";
-import CallButton from "../component/CallButton";
+import CallButton from "../components/CallButton";
 import {
   Channel,
   ChannelHeader,
