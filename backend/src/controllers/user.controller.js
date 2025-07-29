@@ -27,7 +27,7 @@ export async function getMyFriends(req, res) {
       .select("friends")
       .populate(
         "friends",
-        "fullname proilePic nativeLanguage learningLanguage"
+        "fullname nativeLanguage profilePic learningLanguage"
       );
 
     res.status(200).json(user.friends);

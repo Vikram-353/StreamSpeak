@@ -1,189 +1,406 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import useAuthHook from "../hooks/useAuthHook";
 import {
-  getOutgoingFriendReqs,
-  getRecommendedUsers,
-  getUserFriends,
-  sendfriendRequest,
+  getAllPosts,
+  toggleLikePost,
+  commentOnPost,
+  getPostComments,
+  updatePost,
+  deletePost,
 } from "../lib/api";
-import { Link } from "react-router-dom";
 import {
-  CheckCircleIcon,
-  MapPinIcon,
-  UserPlusIcon,
-  UsersIcon,
+  HeartIcon,
+  MessageSquareIcon,
+  EditIcon,
+  TrashIcon,
+  MoreHorizontalIcon,
 } from "lucide-react";
-
-import { capitialize } from "../lib/utils";
-
-import FriendCard, { getLanguageFlag } from "../components/FriendCard";
-import NoFriendsFound from "../components/NoFriendsFound";
+import { formatDistanceToNow } from "date-fns";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
-  const [outgoingRequestsIds, setOutgoingRequestsIds] = useState(new Set());
+  const [commentText, setCommentText] = useState({});
+  const [showComments, setShowComments] = useState({});
+  const [editingPost, setEditingPost] = useState(null);
+  const [editContent, setEditContent] = useState("");
+  const [showDropdown, setShowDropdown] = useState({});
+  const { authUser } = useAuthHook();
 
-  const { data: friends = [], isLoading: loadingFriends } = useQuery({
-    queryKey: ["friends"],
-    queryFn: getUserFriends,
+  const currentUserId = authUser._id;
+
+  // Fetch all posts
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ["posts"],
+    queryFn: getAllPosts,
   });
 
-  const { data: recommendedUsers = [], isLoading: loadingUsers } = useQuery({
-    queryKey: ["users"],
-    queryFn: getRecommendedUsers,
+  const likeMutation = useMutation({
+    mutationFn: toggleLikePost,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts"] }),
   });
 
-  const { data: outgoingFriendReqs } = useQuery({
-    queryKey: ["outgoingFriendReqs"],
-    queryFn: getOutgoingFriendReqs,
+  const commentMutation = useMutation({
+    mutationFn: ({ postId, text }) => commentOnPost(postId, text),
+    onSuccess: (_, { postId }) => {
+      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      setCommentText((prev) => ({ ...prev, [postId]: "" }));
+    },
   });
 
-  const { mutate: sendRequestMutation, isPending } = useMutation({
-    mutationFn: sendfriendRequest,
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"] }),
+  const updateMutation = useMutation({
+    mutationFn: ({ postId, content, mediaUrl, mediaType }) =>
+      updatePost(postId, { content, mediaUrl, mediaType }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      setEditingPost(null);
+      setEditContent("");
+    },
   });
 
-  useEffect(() => {
-    const outgoingIds = new Set();
-    if (outgoingFriendReqs && outgoingFriendReqs.length > 0) {
-      outgoingFriendReqs.forEach((req) => {
-        outgoingIds.add(req.recipient._id);
-      });
-      setOutgoingRequestsIds(outgoingIds);
+  const deleteMutation = useMutation({
+    mutationFn: deletePost,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+
+  const handleLike = (postId) => {
+    likeMutation.mutate(postId);
+  };
+
+  const handleComment = (postId) => {
+    if (commentText[postId]?.trim()) {
+      commentMutation.mutate({ postId, text: commentText[postId].trim() });
     }
-  }, [outgoingFriendReqs]);
+  };
+
+  const handleEditPost = (post) => {
+    setEditingPost(post._id);
+    setEditContent(post.content);
+    setShowDropdown((prev) => ({ ...prev, [post._id]: false }));
+  };
+
+  const handleUpdatePost = (postId) => {
+    if (editContent.trim()) {
+      const post = posts.find((p) => p._id === postId);
+      updateMutation.mutate({
+        postId,
+        content: editContent.trim(),
+        mediaUrl: post.mediaUrl,
+        mediaType: post.mediaType,
+      });
+    }
+  };
+
+  const handleDeletePost = (postId) => {
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      deleteMutation.mutate(postId);
+    }
+    setShowDropdown((prev) => ({ ...prev, [postId]: false }));
+  };
+
+  const toggleComments = (postId) => {
+    setShowComments((prev) => ({
+      ...prev,
+      [postId]: !prev[postId],
+    }));
+  };
+
+  const toggleDropdown = (postId) => {
+    setShowDropdown((prev) => ({
+      ...prev,
+      [postId]: !prev[postId],
+    }));
+  };
+
+  const isPostLiked = (post) => {
+    return post.likes.includes(currentUserId);
+  };
+
+  const isPostOwner = (post) => {
+    return post?.user?._id === currentUserId;
+    // return true;
+  };
 
   return (
-    <div className="p-4 h-full sm:p-6 lg:p-8">
-      <div className="container mx-auto space-y-10">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            Your Friends
-          </h2>
-          <Link to="/notifications" className="btn btn-outline btn-sm">
-            <UsersIcon className="mr-2 size-4" />
-            Friend Requests
-          </Link>
+    <div className="p-4 max-w-4xl mx-auto">
+      <h2 className="text-3xl font-bold mb-6">Latest Posts</h2>
+
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <span className="loading loading-spinner loading-lg" />
         </div>
+      ) : posts.length === 0 ? (
+        <p className="text-center text-gray-500">No posts available.</p>
+      ) : (
+        posts.map((post) => (
+          <div
+            key={post._id}
+            className="card bg-base-100 shadow-sm mb-6 border border-gray-200"
+          >
+            <div className="card-body space-y-3">
+              <div className="flex justify-between items-center">
+                <h3 className="font-semibold text-lg">{post.user.fullname}</h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-400">
+                    {formatDistanceToNow(new Date(post.createdAt))} ago
+                  </span>
 
-        {loadingFriends ? (
-          <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-lg" />
-          </div>
-        ) : friends.length === 0 ? (
-          <NoFriendsFound />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {friends.map((friend) => (
-              <FriendCard key={friend._id} friend={friend} />
-            ))}
-          </div>
-        )}
-
-        <section>
-          <div className="mb-6 sm:mb-8">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                  Meet New Learners
-                </h2>
-                <p className="opacity-70">
-                  Discover perfect language exchange partners based on your
-                  profile
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {loadingUsers ? (
-            <div className="flex justify-center py-12">
-              <span className="loading loading-spinner loading-lg" />
-            </div>
-          ) : recommendedUsers.length === 0 ? (
-            <div className="card bg-base-200 p-6 text-center">
-              <h3 className="font-semibold text-lg mb-2">
-                No recommendations available
-              </h3>
-              <p className="text-base-content opacity-70">
-                Check back later for new language partners!
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recommendedUsers.map((user) => {
-                const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
-
-                return (
-                  <div
-                    key={user._id}
-                    className="card bg-base-200 hover:shadow-lg transition-all duration-300"
-                  >
-                    <div className="card-body p-5 space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="avatar size-16 rounded-full">
-                          <img src={user.profilePic} alt={user.fullName} />
-                        </div>
-
-                        <div>
-                          <h3 className="font-semibold text-lg">
-                            {user.fullName}
-                          </h3>
-                          {user.location && (
-                            <div className="flex items-center text-xs opacity-70 mt-1">
-                              <MapPinIcon className="size-3 mr-1" />
-                              {user.location}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Languages with flags */}
-                      <div className="flex flex-wrap gap-1.5">
-                        <span className="badge badge-secondary">
-                          {getLanguageFlag(user.nativeLanguage)}
-                          Native: {capitialize(user.nativeLanguage)}
-                        </span>
-                        <span className="badge badge-outline">
-                          {getLanguageFlag(user.learningLanguage)}
-                          Learning: {capitialize(user.learningLanguage)}
-                        </span>
-                      </div>
-
-                      {user.bio && (
-                        <p className="text-sm opacity-70">{user.bio}</p>
-                      )}
-
-                      {/* Action button */}
+                  {/* Post Actions Dropdown - Only for post owner */}
+                  {isPostOwner(post) && (
+                    <div className="relative">
                       <button
-                        className={`btn w-full mt-2 ${
-                          hasRequestBeenSent ? "btn-disabled" : "btn-primary"
-                        } `}
-                        onClick={() => sendRequestMutation(user._id)}
-                        disabled={hasRequestBeenSent || isPending}
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => toggleDropdown(post._id)}
                       >
-                        {hasRequestBeenSent ? (
-                          <>
-                            <CheckCircleIcon className="size-4 mr-2" />
-                            Request Sent
-                          </>
-                        ) : (
-                          <>
-                            <UserPlusIcon className="size-4 mr-2" />
-                            Send Friend Request
-                          </>
-                        )}
+                        <MoreHorizontalIcon className="size-4" />
                       </button>
+
+                      {showDropdown[post._id] && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
+                          <button
+                            className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2"
+                            onClick={() => handleEditPost(post)}
+                          >
+                            <EditIcon className="size-4" />
+                            Edit Post
+                          </button>
+                          <button
+                            className="w-full px-4 py-2 text-left hover:bg-gray-100 text-red-600 flex items-center gap-2"
+                            onClick={() => handleDeletePost(post._id)}
+                          >
+                            <TrashIcon className="size-4" />
+                            Delete Post
+                          </button>
+                        </div>
+                      )}
                     </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Post Content - Editable if in edit mode */}
+              {editingPost === post._id ? (
+                <div className="space-y-2">
+                  <textarea
+                    className="textarea textarea-bordered w-full"
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    rows={3}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => handleUpdatePost(post._id)}
+                      disabled={updateMutation.isPending}
+                    >
+                      {updateMutation.isPending ? "Updating..." : "Update"}
+                    </button>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => {
+                        setEditingPost(null);
+                        setEditContent("");
+                      }}
+                    >
+                      Cancel
+                    </button>
                   </div>
-                );
-              })}
+                </div>
+              ) : (
+                <p>{post.content}</p>
+              )}
+
+              {/* Media Display */}
+              {post.mediaType !== "none" && post.mediaUrl && (
+                <div className="w-full max-h-[400px] overflow-hidden rounded">
+                  {post.mediaType === "image" ? (
+                    <img
+                      src={post.mediaUrl}
+                      alt="Post media"
+                      className="rounded object-cover w-full cursor-pointer"
+                      onClick={() => window.open(post.mediaUrl, "_blank")}
+                    />
+                  ) : post.mediaType === "video" ? (
+                    <video controls className="w-full rounded">
+                      <source src={post.mediaUrl} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : null}
+                </div>
+              )}
+
+              {/* Like & Comment Buttons */}
+              <div className="flex gap-4 mt-2">
+                <button
+                  className={`btn btn-sm ${
+                    isPostLiked(post) ? "btn-primary" : "btn-outline"
+                  }`}
+                  onClick={() => handleLike(post._id)}
+                  disabled={likeMutation.isPending}
+                >
+                  <HeartIcon
+                    className={`size-4 mr-2 ${
+                      isPostLiked(post) ? "fill-current" : ""
+                    }`}
+                  />
+                  {post.likes.length}{" "}
+                  {post.likes.length === 1 ? "Like" : "Likes"}
+                </button>
+
+                <button
+                  className="btn btn-sm btn-outline"
+                  onClick={() => toggleComments(post._id)}
+                >
+                  <MessageSquareIcon className="size-4 mr-2" />
+                  Comments
+                </button>
+              </div>
+
+              {/* Comment Section */}
+              {showComments[post._id] && (
+                <div className="mt-4 space-y-3">
+                  <CommentList postId={post._id} />
+                  <div className="flex gap-2 mt-2">
+                    <input
+                      type="text"
+                      className="input input-bordered w-full"
+                      placeholder="Add a comment..."
+                      value={commentText[post._id] || ""}
+                      onChange={(e) =>
+                        setCommentText((prev) => ({
+                          ...prev,
+                          [post._id]: e.target.value,
+                        }))
+                      }
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          handleComment(post._id);
+                        }
+                      }}
+                    />
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => handleComment(post._id)}
+                      disabled={
+                        commentMutation.isPending ||
+                        !commentText[post._id]?.trim()
+                      }
+                    >
+                      {commentMutation.isPending ? "Posting..." : "Post"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </section>
-      </div>
+          </div>
+        ))
+      )}
+
+      {/* Click outside to close dropdowns */}
+      {Object.values(showDropdown).some(Boolean) && (
+        <div
+          className="fixed inset-0 z-0"
+          onClick={() => setShowDropdown({})}
+        />
+      )}
     </div>
   );
 };
 
+// Enhanced Comment List Component
+// const CommentList = ({ postId }) => {
+//   const { data: comments = [], isLoading } = useQuery({
+//     queryKey: ["comments", postId],
+//     queryFn: () => getPostComments(postId),
+//   });
+
+//   if (isLoading)
+//     return <p className="text-sm text-gray-500">Loading comments...</p>;
+
+//   return (
+//     <div className="space-y-2 max-h-60 overflow-y-auto">
+//       {comments.length === 0 ? (
+//         <p className="text-sm text-gray-400">
+//           No comments yet. Be the first to comment!
+//         </p>
+//       ) : (
+//         comments.map((comment) => (
+//           <div
+//             key={comment._id}
+//             className="text-sm border-b pb-2 last:border-b-0"
+//           >
+//             <div className="flex justify-between items-start">
+//               <div>
+//                 <strong className="text-primary">{comment.user.name}:</strong>
+//                 <span className="ml-2">{comment.text}</span>
+//               </div>
+//               {comment.createdAt && (
+//                 <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
+//                   {formatDistanceToNow(new Date(comment.createdAt))} ago
+//                 </span>
+//               )}
+//             </div>
+//           </div>
+//         ))
+//       )}
+//     </div>
+//   );
+// };
+
+const CommentList = ({ postId }) => {
+  const {
+    data: comments = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["comments", postId],
+    queryFn: () => getPostComments(postId),
+    retry: 1,
+  });
+
+  if (isLoading)
+    return <p className="text-sm text-gray-500">Loading comments...</p>;
+
+  if (error) {
+    console.error("Error loading comments:", error);
+    return <p className="text-sm text-red-500">Failed to load comments.</p>;
+  }
+
+  // Ensure comments is an array
+  const commentsArray = Array.isArray(comments) ? comments : [];
+
+  return (
+    <div className="space-y-2 max-h-60 overflow-y-auto">
+      {commentsArray.length === 0 ? (
+        <p className="text-sm text-gray-400">
+          No comments yet. Be the first to comment!
+        </p>
+      ) : (
+        commentsArray.map((comment) => (
+          <div
+            key={comment._id}
+            className="text-sm border-b pb-2 last:border-b-0"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <strong className="text-primary">
+                  {comment.user?.fullname || "Unknown User"}:
+                </strong>
+                <span className="ml-2">{comment.text}</span>
+              </div>
+              {comment.createdAt && (
+                <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
+                  {formatDistanceToNow(new Date(comment.createdAt))} ago
+                </span>
+              )}
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+};
 export default HomePage;

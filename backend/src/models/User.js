@@ -34,6 +34,7 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
   },
   { timestamps: true }
 );

@@ -15,7 +15,9 @@ export const logout = async () => {
 
 export const getAuthUser = async () => {
   try {
-    const res = await axiosInstance.get("/auth/me");
+    const res = await axiosInstance.get("/auth/me", {
+      withCredentials: true,
+    });
     return res.data;
   } catch (error) {
     return null;
@@ -62,3 +64,40 @@ export async function getStreamToken() {
   const response = await axiosInstance.get("/chat/token");
   return response.data;
 }
+
+export const getAllPosts = async () => {
+  const res = await axiosInstance.get("/posts");
+  return res.data;
+};
+
+// Like a post
+export const likePost = async (postId) => {
+  const res = await axiosInstance.post(`/posts/like/${postId}`);
+  return res.data;
+};
+
+// Comment on a post
+export const commentOnPost = async (postId, commentText) => {
+  const res = await axiosInstance.post(`/posts/comment/${postId}`, {
+    text: commentText,
+  });
+  return res.data;
+};
+
+// Get comments on a post
+export const getPostComments = async (postId) => {
+  const res = await axiosInstance.get(`/posts/comment/${postId}`);
+  return res.data;
+};
+export const deletePost = async (postId) => {
+  const res = await axiosInstance.delete(`/posts/${postId}`);
+  return res.data;
+};
+export const toggleLikePost = async (postId) => {
+  const res = await axiosInstance.put(`/posts/like/${postId}`);
+  return res.data;
+};
+export const updatePost = async (postId) => {
+  const res = await axiosInstance.put(`/posts/${postId}`);
+  return res.data;
+};
