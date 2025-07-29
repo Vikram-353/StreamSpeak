@@ -15,12 +15,15 @@
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "chatapp": "file:..",
+    "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.0",
+    "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.2",
+    "multer": "^2.0.2",
     "stream-chat": "^8.60.0"
   },
   "devDependencies": {

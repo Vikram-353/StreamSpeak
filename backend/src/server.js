@@ -6,8 +6,10 @@ import postRoutes from "./routes/post.route.js";
 import { connectDB } from "./lib/db.js";
 import cookieParser from "cookie-parser";
 import chatRoutes from "./routes/chat.route.js";
+import profileRouter from "./routes/profile.route.js";
 import cors from "cors";
 import path from "path";
+import uploadRoutes from "./routes/upload.route.js";
 
 dotenv.config();
 
@@ -29,6 +31,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/profile", profileRouter);
+app.use("/api/upload", uploadRoutes);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));

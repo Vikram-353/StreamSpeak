@@ -1,14 +1,23 @@
 import Post from "../models/Post.js";
 import Comment from "../models/comments.js";
+import User from "../models/User.js";
 
-// Create a post
 export const createPost = async (req, res) => {
   try {
     const { content, mediaUrl, mediaType } = req.body;
+
     const post = new Post({ user: req.user.id, content, mediaUrl, mediaType });
     await post.save();
+
+    await User.findByIdAndUpdate(
+      req.user.id,
+      { $push: { posts: post._id } },
+      { new: true }
+    );
+
     res.status(201).json(post);
   } catch (err) {
+    console.error("Error creating post:", err);
     res.status(500).json({ error: err.message });
   }
 };

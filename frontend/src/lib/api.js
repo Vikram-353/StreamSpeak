@@ -89,6 +89,10 @@ export const getPostComments = async (postId) => {
   const res = await axiosInstance.get(`/posts/comment/${postId}`);
   return res.data;
 };
+export const getProfilePosts = async (userId) => {
+  const res = await axiosInstance.get(`/profile/profile-posts/${userId}`);
+  return res.data;
+};
 export const deletePost = async (postId) => {
   const res = await axiosInstance.delete(`/posts/${postId}`);
   return res.data;
@@ -99,5 +103,18 @@ export const toggleLikePost = async (postId) => {
 };
 export const updatePost = async (postId) => {
   const res = await axiosInstance.put(`/posts/${postId}`);
+  return res.data;
+};
+export const createPost = async (data) => {
+  const res = await axiosInstance.post(`/posts`, data, {
+    withCredentials: true,
+  });
+  return res.data;
+};
+export const updateUserProfile = async (postId, data) => {
+  const res = await axiosInstance.patch(
+    `/profile/update-profile/${postId}`,
+    data
+  );
   return res.data;
 };

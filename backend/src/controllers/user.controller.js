@@ -160,3 +160,6 @@ export async function getOutgoingFriendRequest(req, res) {
     res.status(500).json({ message: "Internal server error. " });
   }
 }
+
+
+
