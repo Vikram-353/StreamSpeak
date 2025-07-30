@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { getFriendRequests, acceptFriendRequests } from "../lib/api";
+import useAuthHook from "../hooks/useAuthHook";
 import {
   BellIcon,
   ClockIcon,
@@ -11,6 +12,7 @@ import NoNotificationsFound from "../components/NoNotificationsFound";
 
 function NotificationPage() {
   const queryClient = useQueryClient();
+  const { authUser } = useAuthHook();
 
   const { data: friendRequests, isLoading } = useQuery({
     queryKey: ["friendRequests"],
@@ -27,6 +29,9 @@ function NotificationPage() {
 
   const incomingRequests = friendRequests?.incomingReqs || [];
   const acceptedRequests = friendRequests?.acceptedReqs || {};
+  console.log(acceptedRequests);
+  console.log(incomingRequests);
+  console.log(authUser);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">

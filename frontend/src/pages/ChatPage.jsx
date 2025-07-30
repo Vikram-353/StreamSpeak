@@ -6,6 +6,8 @@ import ChatLoader from "../components/chatLoader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getStreamToken } from "../lib/api";
 import CallButton from "../components/CallButton";
+import toast from "react-hot-toast";
+
 import {
   Channel,
   ChannelHeader,
@@ -25,17 +27,17 @@ function ChatPage() {
   const [chatClient, setChatClient] = useState(null);
   const [channel, setChannel] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [channelId, setChannelId] = useState();
 
   const { authUser } = useAuthHook();
   const { data: tokenData } = useQuery({
     queryKey: ["streamToken"],
     queryFn: getStreamToken,
-    enabled: !!authUser, //do not usequery untill we have authenticated user
   });
 
   useEffect(() => {
     const initChat = async () => {
-      if (!tokenData?.token || !authUser) return;
+      if (!tokenData?.token || !authUser || !targetUserId) return;
 
       try {
         console.log("Initializing stream chat client...");
@@ -50,9 +52,9 @@ function ChatPage() {
           tokenData.token
         );
 
-        const channelId = [authUser._id, targetUserId].sort().join("-");
+        const idForChannel = [authUser._id, targetUserId].sort().join("-");
 
-        const currChannel = client.channel("messaging", channelId, {
+        const currChannel = client.channel("messaging", idForChannel, {
           members: [authUser._id, targetUserId],
         });
 
@@ -67,6 +69,7 @@ function ChatPage() {
         setLoading(false);
       }
     };
+
     initChat();
   }, [tokenData, authUser, targetUserId]);
 
