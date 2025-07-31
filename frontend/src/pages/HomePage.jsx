@@ -133,18 +133,18 @@ const HomePage = () => {
           <span className="loading loading-spinner loading-lg" />
         </div>
       ) : posts.length === 0 ? (
-        <p className="text-center text-gray-500">No posts available.</p>
+        <p className="text-center ">No posts available.</p>
       ) : (
         posts.map((post) => (
           <div
             key={post._id}
-            className="card bg-base-100 shadow-sm mb-6 border border-gray-200"
+            className="card bg-base-100 shadow-sm mb-6 border "
           >
             <div className="card-body space-y-3">
               <div className="flex justify-between items-center">
                 <h3 className="font-semibold text-lg">{post.user.fullname}</h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-400">
+                  <span className="text-sm ">
                     {formatDistanceToNow(new Date(post.createdAt))} ago
                   </span>
 
@@ -159,16 +159,16 @@ const HomePage = () => {
                       </button>
 
                       {showDropdown[post._id] && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
+                        <div className="absolute right-0 mt-2  w-48 rounded-md shadow-lg z-10 border">
                           <button
-                            className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2"
+                            className="w-full px-4 py-2 text-left hover:bg-gray-800 flex items-center gap-2"
                             onClick={() => handleEditPost(post)}
                           >
                             <EditIcon className="size-4" />
                             Edit Post
                           </button>
                           <button
-                            className="w-full px-4 py-2 text-left hover:bg-gray-100 text-red-600 flex items-center gap-2"
+                            className="w-full px-4 py-2 text-left hover:bg-gray-800  text-red-600 flex items-center gap-2"
                             onClick={() => handleDeletePost(post._id)}
                           >
                             <TrashIcon className="size-4" />
@@ -213,21 +213,34 @@ const HomePage = () => {
                 <p>{post.content}</p>
               )}
 
-              {/* Media Display */}
               {post.mediaType !== "none" && post.mediaUrl && (
-                <div className="w-full max-h-[400px] overflow-hidden rounded">
+                <div className="relative w-full  rounded-xl overflow-hidden border ">
                   {post.mediaType === "image" ? (
-                    <img
-                      src={post.mediaUrl}
-                      alt="Post media"
-                      className="rounded object-cover w-full cursor-pointer"
-                      onClick={() => window.open(post.mediaUrl, "_blank")}
-                    />
+                    <div className="relative w-full">
+                      <img
+                        src={post.mediaUrl}
+                        alt="Post media"
+                        className="w-full h-auto max-h-[300px] sm:max-h-[400px] md:max-h-[500px] object-contain cursor-pointer hover:opacity-95 transition-opacity"
+                        onClick={() => window.open(post.mediaUrl, "_blank")}
+                        style={{ display: "block" }}
+                      />
+                      <div className="absolute top-2 right-2 bg-black bg-opacity-50 px-2 py-1 rounded text-xs">
+                        Click to expand
+                      </div>
+                    </div>
                   ) : post.mediaType === "video" ? (
-                    <video controls className="w-full rounded">
-                      <source src={post.mediaUrl} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
+                    <div className="relative w-full">
+                      <video
+                        controls
+                        className="w-full h-auto max-h-[300px] sm:max-h-[400px] md:max-h-[500px] object-contain"
+                        preload="metadata"
+                      >
+                        <source src={post.mediaUrl} type="video/mp4" />
+                        <source src={post.mediaUrl} type="video/webm" />
+                        <source src={post.mediaUrl} type="video/ogg" />
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
                   ) : null}
                 </div>
               )}
@@ -309,46 +322,6 @@ const HomePage = () => {
     </div>
   );
 };
-
-// Enhanced Comment List Component
-// const CommentList = ({ postId }) => {
-//   const { data: comments = [], isLoading } = useQuery({
-//     queryKey: ["comments", postId],
-//     queryFn: () => getPostComments(postId),
-//   });
-
-//   if (isLoading)
-//     return <p className="text-sm text-gray-500">Loading comments...</p>;
-
-//   return (
-//     <div className="space-y-2 max-h-60 overflow-y-auto">
-//       {comments.length === 0 ? (
-//         <p className="text-sm text-gray-400">
-//           No comments yet. Be the first to comment!
-//         </p>
-//       ) : (
-//         comments.map((comment) => (
-//           <div
-//             key={comment._id}
-//             className="text-sm border-b pb-2 last:border-b-0"
-//           >
-//             <div className="flex justify-between items-start">
-//               <div>
-//                 <strong className="text-primary">{comment.user.name}:</strong>
-//                 <span className="ml-2">{comment.text}</span>
-//               </div>
-//               {comment.createdAt && (
-//                 <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
-//                   {formatDistanceToNow(new Date(comment.createdAt))} ago
-//                 </span>
-//               )}
-//             </div>
-//           </div>
-//         ))
-//       )}
-//     </div>
-//   );
-// };
 
 const CommentList = ({ postId }) => {
   const {
