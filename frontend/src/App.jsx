@@ -7,7 +7,7 @@ import NotificationsPage from "./pages/NotificationPage.jsx";
 import CallPage from "./pages/CallPage.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
 import FriendPage from "./pages/FriendPage.jsx";
-import PageLoader from "./components/PageLoader.jsx";
+import PageLoader from "./components/pageLoader.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import OnboardingPage from "./pages/OnboardingPage.jsx";
 import Layout from "./components/Layout.jsx";

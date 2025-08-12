@@ -3,8 +3,7 @@ import { useNavigate, useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getStreamToken } from "../lib/api";
 import useAuthHook from "../hooks/useAuthHook";
-import PageLoader from "../components/PageLoader.jsx";
-
+import PageLoader from "../components/pageLoader";
 import {
   StreamVideo,
   StreamVideoClient,

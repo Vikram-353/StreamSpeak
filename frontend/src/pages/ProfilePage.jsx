@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useAuthHook from "../hooks/useAuthHook";
 import toast from "react-hot-toast";
 import "react-confirm-alert/src/react-confirm-alert.css";
-import PageLoader from "../components/PageLoader.jsx";
+// import PageLoader from "../components/PageLoader.jsx";
+import PageLoader from "../components/pageLoader.jsx";
 import { PostCard } from "../components/PostCard.jsx";
 import {
   createPost,

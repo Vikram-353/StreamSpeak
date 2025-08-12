@@ -11,7 +11,7 @@ import {
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { logout } from "../lib/api";
 import ThemeSelector from "./ThemeSelector";
-
+import { logo } from "../assets/assets";
 const Navbar = ({ showSidebar = false }) => {
   const { authUser } = useAuthHook();
   const location = useLocation();
@@ -53,7 +53,8 @@ const Navbar = ({ showSidebar = false }) => {
             )}
             {isChatPage && (
               <Link to="/" className="flex items-center gap-2.5">
-                <ShipWheelIcon className="size-9 text-primary" />
+                {/* <ShipWheelIcon className="size-9 text-primary" /> */}
+                <img src={logo} alt="logo" className="size-9 text-primary" />
                 <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
                   Streamify
                 </span>

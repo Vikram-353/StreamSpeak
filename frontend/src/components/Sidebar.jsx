@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import useAuthHook from "../hooks/useAuthHook";
 import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon } from "lucide-react";
+import { logo } from "../assets/assets";
 
 const Sidebar = () => {
   const { authUser } = useAuthHook();
@@ -11,7 +12,7 @@ const Sidebar = () => {
     <aside className="w-64 bg-base-200 border-r border-base-300 flex flex-col h-screen">
       <div className="p-5 border-b border-base-300">
         <Link to="/" className="flex items-center gap-2.5">
-          <ShipWheelIcon className="size-9 text-primary" />
+          <img src={logo} alt="logo" className="size-9 text-primary" />
           <span className="text-2xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
             StreamSpeak
           </span>
