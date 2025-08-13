@@ -13,7 +13,7 @@ import Layout from "./components/Layout.jsx";
 import { Toaster } from "react-hot-toast";
 import useAuthUser from "./hooks/useAuthHook.jsx";
 import { useThemeStore } from "./store/useThemeStore.js";
-import PageLoader from "./components/pageLoader.jsx";
+import PageLoader from "../components/PageLoader.jsx";
 
 const App = () => {
   const { isLoading, authUser } = useAuthUser();
