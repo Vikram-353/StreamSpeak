@@ -35,12 +35,8 @@ function ProfilePage() {
   const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
 
-  const [newPost, setNewPost] = useState("");
   const [editingPostId, setEditingPostId] = useState(null);
   const [updatedPost, setUpdatedPost] = useState("");
-
-  const PRESET = import.meta.env.VITE_CLOUDINARY_PRESET;
-  const CLOUDE = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 
   const updateUserMutation = useMutation({
     mutationFn: (data) => updateUserProfile(user._id, data),
