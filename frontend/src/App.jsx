@@ -13,7 +13,8 @@ import Layout from "./components/Layout.jsx";
 import { Toaster } from "react-hot-toast";
 import useAuthUser from "./hooks/useAuthHook.jsx";
 import { useThemeStore } from "./store/useThemeStore.js";
-import PageLoader from "./components/pageLoader.jsx";
+// import PageLoader from "./components/pageLoader.jsx";
+
 const App = () => {
   const { isLoading, authUser } = useAuthUser();
   const { theme } = useThemeStore();
@@ -21,7 +22,7 @@ const App = () => {
   const isAuthenticated = Boolean(authUser);
   const isOnboarded = authUser?.isOnboarded;
 
-  if (isLoading) return <PageLoader />;
+  // if (isLoading) return <PageLoader />;
 
   return (
     <div className="h-full" data-theme={theme}>
