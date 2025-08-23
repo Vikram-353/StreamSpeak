@@ -17,6 +17,7 @@ import {
   MoreHorizontalIcon,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import toast from "react-hot-toast";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
@@ -102,20 +103,47 @@ const HomePage = () => {
     }
   };
 
+  // const handleShare = (post) => {
+  //   const postUrl = `${window.location.origin}/posts/${post._id}`;
+
+  //   if (navigator.share) {
+  //     navigator
+  //       .share({
+  //         title: post.user.fullname + "'s Post",
+  //         text: post.content,
+  //         url: postUrl,
+  //       })
+  //       .catch((err) => console.error("Share cancelled:", err));
+  //   } else {
+  //     navigator.clipboard.writeText(postUrl);
+  //     alert("Post link copied to clipboard!");
+  //   }
+  // };
+
   const handleShare = (post) => {
     const postUrl = `${window.location.origin}/posts/${post._id}`;
 
     if (navigator.share) {
       navigator
         .share({
-          title: post.user.fullname + "'s Post",
+          title: `${post.user.fullname}'s Post`,
           text: post.content,
           url: postUrl,
         })
-        .catch((err) => console.error("Share cancelled:", err));
+        .catch((err) => console.warn("Share cancelled or failed:", err));
+    } else if (navigator.clipboard) {
+      navigator.clipboard
+        .writeText(postUrl)
+        .then(() => {
+          toast.success("✅ Post link copied to clipboard!");
+        })
+        .catch((err) => {
+          console.error("Clipboard write failed:", err);
+          prompt("Copy this link manually:", postUrl);
+        });
     } else {
-      navigator.clipboard.writeText(postUrl);
-      alert("Post link copied to clipboard!");
+      // ultimate fallback
+      prompt("Copy this link manually:", postUrl);
     }
   };
 
