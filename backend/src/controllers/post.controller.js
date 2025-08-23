@@ -67,6 +67,18 @@ export const deletePost = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+export const getPostById = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id).populate(
+      "user",
+      "fullname profilePic"
+    );
+
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 // Like/Unlike
 export const toggleLikePost = async (req, res) => {

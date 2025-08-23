@@ -8,6 +8,7 @@ import {
   getPostComments,
   updatePost,
   deletePost,
+  getPostById,
 } from "../lib/api";
 import {
   HeartIcon,
@@ -36,6 +37,10 @@ const HomePage = () => {
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["posts"],
     queryFn: getAllPosts,
+  });
+  const { data: postsById = {} } = useQuery({
+    queryKey: ["post"],
+    queryFn: getPostById,
   });
 
   const likeMutation = useMutation({
@@ -102,23 +107,6 @@ const HomePage = () => {
       });
     }
   };
-
-  // const handleShare = (post) => {
-  //   const postUrl = `${window.location.origin}/posts/${post._id}`;
-
-  //   if (navigator.share) {
-  //     navigator
-  //       .share({
-  //         title: post.user.fullname + "'s Post",
-  //         text: post.content,
-  //         url: postUrl,
-  //       })
-  //       .catch((err) => console.error("Share cancelled:", err));
-  //   } else {
-  //     navigator.clipboard.writeText(postUrl);
-  //     alert("Post link copied to clipboard!");
-  //   }
-  // };
 
   const handleShare = (post) => {
     const postUrl = `${window.location.origin}/posts/${post._id}`;

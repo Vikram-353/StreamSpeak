@@ -14,6 +14,7 @@ import { Toaster } from "react-hot-toast";
 import useAuthUser from "./hooks/useAuthHook.jsx";
 import { useThemeStore } from "./store/useThemeStore.js";
 import PageLoader from "./components/PageLoader.jsx";
+import Post from "./pages/Post.jsx";
 const App = () => {
   const { isLoading, authUser } = useAuthUser();
   const { theme } = useThemeStore();
@@ -76,6 +77,18 @@ const App = () => {
             isAuthenticated && isOnboarded ? (
               <Layout showSidebar={true}>
                 <FriendPage />
+              </Layout>
+            ) : (
+              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+            )
+          }
+        />
+        <Route
+          path="/posts/:id"
+          element={
+            isAuthenticated && isOnboarded ? (
+              <Layout showSidebar={true}>
+                <Post />
               </Layout>
             ) : (
               <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
