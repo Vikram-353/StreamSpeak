@@ -26,7 +26,7 @@ export const createPost = async (req, res) => {
 export const getAllPosts = async (req, res) => {
   try {
     const posts = await Post.find()
-      .populate("user", "fullname")
+      .populate("user", "fullname profilePic")
       .sort({ createdAt: -1 });
     res.json(posts);
   } catch (err) {
@@ -114,5 +114,3 @@ export const getPostComments = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-

@@ -25,6 +25,8 @@ const HomePage = () => {
   const [editingPost, setEditingPost] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [showDropdown, setShowDropdown] = useState({});
+  const [animatingLike, setAnimatingLike] = useState(null);
+
   const { authUser } = useAuthHook();
 
   const currentUserId = authUser._id;
@@ -67,7 +69,13 @@ const HomePage = () => {
   });
 
   const handleLike = (postId) => {
-    likeMutation.mutate(postId);
+    // likeMutation.mutate(postId);
+    setAnimatingLike(postId); // only this post animates
+    likeMutation.mutate(postId, {
+      onSettled: () => {
+        setAnimatingLike(null); // reset after mutation completes
+      },
+    });
   };
 
   const handleComment = (postId) => {
@@ -91,6 +99,23 @@ const HomePage = () => {
         mediaUrl: post.mediaUrl,
         mediaType: post.mediaType,
       });
+    }
+  };
+
+  const handleShare = (post) => {
+    const postUrl = `${window.location.origin}/posts/${post._id}`;
+
+    if (navigator.share) {
+      navigator
+        .share({
+          title: post.user.fullname + "'s Post",
+          text: post.content,
+          url: postUrl,
+        })
+        .catch((err) => console.error("Share cancelled:", err));
+    } else {
+      navigator.clipboard.writeText(postUrl);
+      alert("Post link copied to clipboard!");
     }
   };
 
@@ -142,7 +167,16 @@ const HomePage = () => {
           >
             <div className="card-body space-y-3">
               <div className="flex justify-between items-center">
-                <h3 className="font-semibold text-lg">{post.user.fullname}</h3>
+                <div className="flex justify-between gap-3 items-center">
+                  <img
+                    className="h-10 w-10"
+                    src={post.user.profilePic}
+                    alt="profile pic"
+                  />
+                  <h3 className="font-semibold text-lg">
+                    {post.user.fullname}
+                  </h3>
+                </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm ">
                     {formatDistanceToNow(new Date(post.createdAt))} ago
@@ -250,9 +284,9 @@ const HomePage = () => {
                 <button
                   className={`btn btn-sm ${
                     isPostLiked(post) ? "btn-primary" : "btn-outline"
-                  }`}
+                  } ${animatingLike === post._id ? "animate-pulse" : ""}`}
                   onClick={() => handleLike(post._id)}
-                  disabled={likeMutation.isPending}
+                  disabled={animatingLike === post._id} // disable only clicked one
                 >
                   <HeartIcon
                     className={`size-4 mr-2 ${
@@ -269,6 +303,26 @@ const HomePage = () => {
                 >
                   <MessageSquareIcon className="size-4 mr-2" />
                   Comments
+                </button>
+                <button
+                  className="btn btn-sm btn-outline"
+                  onClick={() => handleShare(post)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="size-4 mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 8a3 3 0 100-6 3 3 0 000 6zM6 14a3 3 0 100-6 3 3 0 000 6zm9 8a3 3 0 100-6 3 3 0 000 6zM8.59 13.51l6.83-3.41M8.59 10.49l6.83 3.41"
+                    />
+                  </svg>
+                  Share
                 </button>
               </div>
 
