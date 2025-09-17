@@ -37,26 +37,24 @@ Follow these steps to set up the project locally:
 ```bash
 git clone https://github.com/your-username/streamspeak.git
 cd streamspeak/frontend
+```
 
 ### 2️⃣ Install dependencies
 
 ```bash
 npm install
+```
 
 ### 3️⃣ Setup environment variables
-### Create a 
-```bash .env  ### file in the
-```bash frontend/ ### folder and add:
+
+Create a `.env` file in the `frontend/` folder and add:
 
 ```bash
 REACT_APP_API_URL=your-backend-api-url
+```
 
 ### 4️⃣ Start the development server
 
 ```bash
 npm run dev
-
-
-
-
-
+```
