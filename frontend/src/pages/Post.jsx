@@ -8,6 +8,8 @@ import {
   TrashIcon,
   MoreHorizontalIcon,
 } from "lucide-react";
+import { getPostComments } from "../lib/api";
+
 import useAuthHook from "../hooks/useAuthHook";
 import {
   getPostById,
@@ -17,8 +19,7 @@ import {
   deletePost,
 } from "../lib/api";
 import { useParams } from "react-router";
-// import CommentList from "./CommentList";
-
+import { CommentList } from "../components/CommentList";
 function Post() {
   const { id } = useParams();
   const queryClient = useQueryClient();
@@ -31,6 +32,7 @@ function Post() {
   const [editContent, setEditContent] = useState("");
   const [showDropdown, setShowDropdown] = useState({});
   const [animatingLike, setAnimatingLike] = useState(null);
+  console.log(id);
 
   // Fetch the single post by ID
   const { data: post, isLoading } = useQuery({
@@ -39,6 +41,7 @@ function Post() {
     enabled: !!id,
   });
   console.log(post);
+  // console.log(id);
 
   // Mutations
   const likeMutation = useMutation({
@@ -76,29 +79,29 @@ function Post() {
 
   // Handlers
   const handleLike = () => {
-    setAnimatingLike(post._id);
-    likeMutation.mutate(post._id, { onSettled: () => setAnimatingLike(null) });
+    setAnimatingLike(id);
+    likeMutation.mutate(id, { onSettled: () => setAnimatingLike(null) });
   };
 
   const handleComment = () => {
-    if (commentText[post._id]?.trim()) {
+    if (commentText[id]?.trim()) {
       commentMutation.mutate({
-        id: post._id,
-        text: commentText[post._id].trim(),
+        id: id,
+        text: commentText[id].trim(),
       });
     }
   };
 
   const handleEditPost = () => {
-    setEditingPost(post._id);
+    setEditingPost(id);
     setEditContent(post.content);
-    setShowDropdown((prev) => ({ ...prev, [post._id]: false }));
+    setShowDropdown((prev) => ({ ...prev, [id]: false }));
   };
 
   const handleUpdatePost = () => {
     if (editContent.trim()) {
       updateMutation.mutate({
-        id: post._id,
+        id: id,
         content: editContent.trim(),
         mediaUrl: post.mediaUrl,
         mediaType: post.mediaType,
@@ -108,17 +111,17 @@ function Post() {
 
   const handleDeletePost = () => {
     if (window.confirm("Are you sure you want to delete this post?")) {
-      deleteMutation.mutate(post._id);
+      deleteMutation.mutate(id);
     }
     setShowDropdown({});
   };
 
   const toggleComments = () => {
-    setShowComments((prev) => ({ ...prev, [post._id]: !prev[post._id] }));
+    setShowComments((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const toggleDropdown = () => {
-    setShowDropdown((prev) => ({ ...prev, [post._id]: !prev[post._id] }));
+    setShowDropdown((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const isPostLiked = () =>
@@ -152,7 +155,7 @@ function Post() {
               <button className="btn btn-ghost btn-sm" onClick={toggleDropdown}>
                 <MoreHorizontalIcon className="size-4" />
               </button>
-              {showDropdown[post._id] && (
+              {showDropdown[id] && (
                 <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg z-10 border">
                   <button
                     className="w-full px-4 py-2 text-left hover:bg-gray-800 flex items-center gap-2"
@@ -176,7 +179,7 @@ function Post() {
       </div>
 
       {/* Post Content */}
-      {editingPost === post._id ? (
+      {editingPost === id ? (
         <div className="space-y-2">
           <textarea
             className="textarea textarea-bordered w-full"
@@ -233,9 +236,9 @@ function Post() {
         <button
           className={`btn btn-sm ${
             isPostLiked() ? "btn-primary" : "btn-outline"
-          } ${animatingLike === post._id ? "animate-pulse" : ""}`}
+          } ${animatingLike === id ? "animate-pulse" : ""}`}
           onClick={handleLike}
-          disabled={animatingLike === post._id}
+          disabled={animatingLike === id}
         >
           <HeartIcon
             className={`size-4 mr-2 ${isPostLiked() ? "fill-current" : ""}`}
@@ -271,19 +274,19 @@ function Post() {
       </div>
 
       {/* Comments Section */}
-      {showComments[post._id] && (
+      {showComments[id] && (
         <div className="mt-4 space-y-3">
-          {/* <CommentList id={post._id} /> */}
+          <CommentList postId={id} />
           <div className="flex gap-2 mt-2">
             <input
               type="text"
               className="input input-bordered w-full"
               placeholder="Add a comment..."
-              value={commentText[post._id] || ""}
+              value={commentText[id] || ""}
               onChange={(e) =>
                 setCommentText((prev) => ({
                   ...prev,
-                  [post._id]: e.target.value,
+                  [id]: e.target.value,
                 }))
               }
               onKeyPress={(e) => {
@@ -293,9 +296,7 @@ function Post() {
             <button
               className="btn btn-primary"
               onClick={handleComment}
-              disabled={
-                commentMutation.isPending || !commentText[post._id]?.trim()
-              }
+              disabled={commentMutation.isPending || !commentText[id]?.trim()}
             >
               {commentMutation.isPending ? "Posting..." : "Post"}
             </button>
@@ -305,5 +306,59 @@ function Post() {
     </div>
   );
 }
+
+// const CommentList = ({ postId }) => {
+//   const {
+//     data: comments = [],
+//     isLoading,
+//     error,
+//   } = useQuery({
+//     queryKey: ["comments", postId],
+//     queryFn: () => getPostComments(postId),
+//     retry: 1,
+//   });
+
+//   if (isLoading)
+//     return <p className="text-sm text-gray-500">Loading comments...</p>;
+
+//   if (error) {
+//     console.error("Error loading comments:", error);
+//     return <p className="text-sm text-red-500">Failed to load comments.</p>;
+//   }
+
+//   // Ensure comments is an array
+//   const commentsArray = Array.isArray(comments) ? comments : [];
+
+//   return (
+//     <div className="space-y-2 max-h-60 overflow-y-auto">
+//       {commentsArray.length === 0 ? (
+//         <p className="text-sm text-gray-400">
+//           No comments yet. Be the first to comment!
+//         </p>
+//       ) : (
+//         commentsArray.map((comment) => (
+//           <div
+//             key={comment._id}
+//             className="text-sm border-b pb-2 last:border-b-0"
+//           >
+//             <div className="flex justify-between items-start">
+//               <div>
+//                 <strong className="text-primary">
+//                   {comment.user?.fullname || "Unknown User"}:
+//                 </strong>
+//                 <span className="ml-2">{comment.text}</span>
+//               </div>
+//               {comment.createdAt && (
+//                 <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
+//                   {formatDistanceToNow(new Date(comment.createdAt))} ago
+//                 </span>
+//               )}
+//             </div>
+//           </div>
+//         ))
+//       )}
+//     </div>
+//   );
+// };
 
 export default Post;
